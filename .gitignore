@@ -1,0 +1,24 @@
+# Debug scripts
+*.ps1
+
+# Debug screenshots and logs
+*.png
+*.log
+debug.log
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# IDE files
+.vs/
+*.user
+*.suo
+*.sln
+*.csproj
+bin/
+obj/
+
+# Keep the compiled exe
+!DesktopClock.exe
