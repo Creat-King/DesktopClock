@@ -33,6 +33,7 @@ DesktopClock stays on top of all windows as a transparent time display. Mouse cl
 ## 中文说明
 
 一个真正「不挡手」的 Windows 桌面时钟。时间始终悬浮在所有窗口之上，但鼠标可以完全穿透它操作下方的界面。不出现在 Alt+Tab、不出现在任务栏、不干扰任何操作。支持企业微信新消息提醒监控。
+<img width="987" height="218" alt="image" src="https://github.com/user-attachments/assets/975c0cf2-acec-4029-a4de-48d0cd671493" />
 
 ### 核心特性
 
