@@ -18,6 +18,7 @@ namespace DesktopClock
 
         private ToolStripMenuItem _moveModeItem;
         private ToolStripMenuItem _startupItem;
+        private ToolStripMenuItem _wecomItem;
         private ToolStripMenuItem[] _sizeItems;
         private ToolStripMenuItem[] _colorItems;
         private ToolStripMenuItem[] _opacityItems;
@@ -99,6 +100,11 @@ namespace DesktopClock
             _startupItem.Checked = _settings.RunAtStartup;
             _startupItem.Click += OnStartupClick;
             _menu.Items.Add(_startupItem);
+
+            _wecomItem = new ToolStripMenuItem("监控企业微信");
+            _wecomItem.Checked = _settings.MonitorWeCom;
+            _wecomItem.Click += OnWeComMonitorClick;
+            _menu.Items.Add(_wecomItem);
 
             _menu.Items.Add(new ToolStripSeparator());
 
@@ -182,6 +188,17 @@ namespace DesktopClock
             _startupItem.Checked = _settings.RunAtStartup;
             _settings.Save();
             SetAutoStart(_settings.RunAtStartup);
+        }
+
+        private void OnWeComMonitorClick(object sender, EventArgs e)
+        {
+            _settings.MonitorWeCom = !_settings.MonitorWeCom;
+            _wecomItem.Checked = _settings.MonitorWeCom;
+            _settings.Save();
+            _dispatcher.Invoke(new Action(delegate
+            {
+                _window.SetWeComMonitoringEnabled(_settings.MonitorWeCom);
+            }));
         }
 
         private void SetAutoStart(bool enable)

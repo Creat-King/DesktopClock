@@ -4,7 +4,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace DesktopClock
@@ -12,12 +14,16 @@ namespace DesktopClock
     internal class ClockWindow : Window
     {
         private TextBlock _timeText;
+        private Ellipse _indicator;
         private Border _border;
         private DispatcherTimer _timer;
         private Settings _settings;
         private IntPtr _hwnd = IntPtr.Zero;
         private bool _isInMoveMode = false;
         private string _lastText = "";
+        private WeComMonitor _wecomMonitor;
+        private bool _monitorWeCom;
+        private int _wmShellHook = 0;
 
         public bool IsInMoveMode { get { return _isInMoveMode; } }
         public event EventHandler MoveModeChanged;
@@ -42,6 +48,21 @@ namespace DesktopClock
             _border.Background = Brushes.Transparent;
             _border.Padding = new Thickness(12, 4, 12, 4);
 
+            _indicator = new Ellipse();
+            _indicator.Width = 10;
+            _indicator.Height = 10;
+            _indicator.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+            _indicator.Margin = new Thickness(0, 0, 8, 0);
+            _indicator.VerticalAlignment = VerticalAlignment.Center;
+            _indicator.ToolTip = "企业微信消息监控";
+            _indicator.Effect = new DropShadowEffect
+            {
+                BlurRadius = 6,
+                ShadowDepth = 0,
+                Color = Colors.Black,
+                Opacity = 0.8
+            };
+
             _timeText = new TextBlock();
             _timeText.FontFamily = new FontFamily("Segoe UI");
             _timeText.FontSize = _settings.FontSize;
@@ -57,7 +78,13 @@ namespace DesktopClock
                 Opacity = 0.8
             };
 
-            _border.Child = _timeText;
+            StackPanel panel = new StackPanel();
+            panel.Orientation = Orientation.Horizontal;
+            panel.VerticalAlignment = VerticalAlignment.Center;
+            panel.Children.Add(_indicator);
+            panel.Children.Add(_timeText);
+
+            _border.Child = panel;
             this.Content = _border;
 
             SetPosition();
@@ -68,6 +95,63 @@ namespace DesktopClock
             _timer.Start();
 
             UpdateTime();
+
+            _monitorWeCom = _settings.MonitorWeCom;
+            if (_monitorWeCom)
+                StartWeComMonitor();
+            else
+                _indicator.Visibility = Visibility.Collapsed;
+        }
+
+        private void StartWeComMonitor()
+        {
+            _indicator.Visibility = Visibility.Visible;
+            _wecomMonitor = new WeComMonitor();
+            _wecomMonitor.StateChanged += OnWeComStateChanged;
+            _wecomMonitor.CheckNow();
+        }
+
+        private void StopWeComMonitor()
+        {
+            if (_wecomMonitor != null)
+            {
+                _wecomMonitor.StateChanged -= OnWeComStateChanged;
+                _wecomMonitor.Stop();
+                _wecomMonitor = null;
+            }
+            _indicator.Visibility = Visibility.Collapsed;
+        }
+
+        public void SetWeComMonitoringEnabled(bool enabled)
+        {
+            _monitorWeCom = enabled;
+            if (enabled)
+                StartWeComMonitor();
+            else
+                StopWeComMonitor();
+        }
+
+        private void OnWeComStateChanged(object sender, EventArgs e)
+        {
+            UpdateIndicator(_wecomMonitor.HasUnreadMessages);
+        }
+
+        private void UpdateIndicator(bool hasMessages)
+        {
+            if (hasMessages)
+            {
+                _indicator.Fill = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36));
+                DoubleAnimation pulse = new DoubleAnimation(1.0, 0.3, TimeSpan.FromSeconds(0.6));
+                pulse.AutoReverse = true;
+                pulse.RepeatBehavior = RepeatBehavior.Forever;
+                _indicator.BeginAnimation(UIElement.OpacityProperty, pulse);
+            }
+            else
+            {
+                _indicator.Fill = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
+                _indicator.BeginAnimation(UIElement.OpacityProperty, null);
+                _indicator.Opacity = 1.0;
+            }
         }
 
         private SolidColorBrush CreateBrush(string colorHex)
@@ -110,6 +194,9 @@ namespace DesktopClock
             HwndSource source = HwndSource.FromHwnd(_hwnd);
             if (source != null)
                 source.AddHook(WndProc);
+
+            _wmShellHook = (int)Win32.RegisterWindowMessage("SHELLHOOK");
+            Win32.RegisterShellHookWindow(_hwnd);
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -118,6 +205,11 @@ namespace DesktopClock
             {
                 ToggleMoveMode();
                 handled = true;
+            }
+            else if (msg == _wmShellHook)
+            {
+                if (_wecomMonitor != null)
+                    _wecomMonitor.HandleShellHookEvent(wParam, lParam);
             }
             return IntPtr.Zero;
         }
@@ -203,8 +295,13 @@ namespace DesktopClock
         {
             if (_timer != null)
                 _timer.Stop();
+            if (_wecomMonitor != null)
+                _wecomMonitor.Stop();
             if (_hwnd != IntPtr.Zero)
+            {
+                Win32.DeregisterShellHookWindow(_hwnd);
                 Win32.UnregisterHotKey(_hwnd, 1);
+            }
             base.OnClosed(e);
         }
     }

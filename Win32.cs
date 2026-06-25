@@ -34,6 +34,30 @@ namespace DesktopClock
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern bool RegisterShellHookWindow(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool DeregisterShellHookWindow(IntPtr hwnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern uint RegisterWindowMessage(string lpString);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        public const uint HSHELL_WINDOWACTIVATED = 4;
+        public const uint HSHELL_FLASH = 0x8006;
+
         private static int GetWindowLongCompat(IntPtr hWnd, int nIndex)
         {
             if (IntPtr.Size == 8)
