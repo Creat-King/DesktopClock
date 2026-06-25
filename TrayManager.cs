@@ -18,9 +18,11 @@ namespace DesktopClock
 
         private ToolStripMenuItem _moveModeItem;
         private ToolStripMenuItem _startupItem;
+        private ToolStripMenuItem _wecomItem;
         private ToolStripMenuItem[] _sizeItems;
         private ToolStripMenuItem[] _colorItems;
         private ToolStripMenuItem[] _opacityItems;
+        private ToolStripMenuItem _characterItem;
 
         private static readonly double[] SIZES = { 28, 40, 56, 72 };
         private static readonly string[] SIZE_LABELS = { "Small 28", "Medium 40", "Large 56", "XLarge 72" };
@@ -99,6 +101,16 @@ namespace DesktopClock
             _startupItem.Checked = _settings.RunAtStartup;
             _startupItem.Click += OnStartupClick;
             _menu.Items.Add(_startupItem);
+
+            _wecomItem = new ToolStripMenuItem("监控企业微信");
+            _wecomItem.Checked = _settings.MonitorWeCom;
+            _wecomItem.Click += OnWeComMonitorClick;
+            _menu.Items.Add(_wecomItem);
+
+            _characterItem = new ToolStripMenuItem("显示小新");
+            _characterItem.Checked = _settings.ShowCharacter;
+            _characterItem.Click += OnCharacterClick;
+            _menu.Items.Add(_characterItem);
 
             _menu.Items.Add(new ToolStripSeparator());
 
@@ -182,6 +194,28 @@ namespace DesktopClock
             _startupItem.Checked = _settings.RunAtStartup;
             _settings.Save();
             SetAutoStart(_settings.RunAtStartup);
+        }
+
+        private void OnWeComMonitorClick(object sender, EventArgs e)
+        {
+            _settings.MonitorWeCom = !_settings.MonitorWeCom;
+            _wecomItem.Checked = _settings.MonitorWeCom;
+            _settings.Save();
+            _dispatcher.Invoke(new Action(delegate
+            {
+                _window.SetWeComMonitoringEnabled(_settings.MonitorWeCom);
+            }));
+        }
+
+        private void OnCharacterClick(object sender, EventArgs e)
+        {
+            _settings.ShowCharacter = !_settings.ShowCharacter;
+            _characterItem.Checked = _settings.ShowCharacter;
+            _settings.Save();
+            _dispatcher.Invoke(new Action(delegate
+            {
+                _window.SetCharacterVisible(_settings.ShowCharacter);
+            }));
         }
 
         private void SetAutoStart(bool enable)

@@ -14,6 +14,8 @@ namespace DesktopClock
         public double Opacity { get; set; }
         public bool RunAtStartup { get; set; }
         public bool Use24Hour { get; set; }
+        public bool MonitorWeCom { get; set; }
+        public bool ShowCharacter { get; set; }
         public bool IsFirstRun { get; private set; }
 
         private static string SettingsDir
@@ -40,6 +42,8 @@ namespace DesktopClock
             Opacity = 0.85;
             RunAtStartup = false;
             Use24Hour = true;
+            MonitorWeCom = true;
+            ShowCharacter = true;
             IsFirstRun = true;
         }
 
@@ -70,6 +74,8 @@ namespace DesktopClock
                     if (dict.ContainsKey("Opacity")) s.Opacity = ParseDouble(dict["Opacity"], 0.85);
                     if (dict.ContainsKey("RunAtStartup")) s.RunAtStartup = ParseBool(dict["RunAtStartup"], false);
                     if (dict.ContainsKey("Use24Hour")) s.Use24Hour = ParseBool(dict["Use24Hour"], true);
+                    if (dict.ContainsKey("MonitorWeCom")) s.MonitorWeCom = ParseBool(dict["MonitorWeCom"], true);
+                    if (dict.ContainsKey("ShowCharacter")) s.ShowCharacter = ParseBool(dict["ShowCharacter"], true);
                 }
             }
             catch { }
@@ -90,6 +96,8 @@ namespace DesktopClock
                 lines.Add("Opacity=" + Opacity.ToString(CultureInfo.InvariantCulture));
                 lines.Add("RunAtStartup=" + RunAtStartup.ToString());
                 lines.Add("Use24Hour=" + Use24Hour.ToString());
+                lines.Add("MonitorWeCom=" + MonitorWeCom.ToString());
+                lines.Add("ShowCharacter=" + ShowCharacter.ToString());
                 File.WriteAllLines(SettingsPath, lines);
             }
             catch { }

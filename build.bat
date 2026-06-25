@@ -4,7 +4,7 @@ set WPF=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\WPF
 set REF=C:\Windows\Microsoft.NET\Framework64\v4.0.30319
 
 echo Compiling DesktopClock...
-%CSC% /target:winexe /out:DesktopClock.exe /platform:x64 /reference:%WPF%\PresentationCore.dll /reference:%WPF%\PresentationFramework.dll /reference:%WPF%\WindowsBase.dll /reference:%REF%\System.Windows.Forms.dll /reference:%REF%\System.Drawing.dll /reference:%REF%\System.Xaml.dll Program.cs ClockWindow.cs TrayManager.cs Win32.cs Settings.cs
+%CSC% /target:winexe /out:DesktopClock.exe /platform:x64 /reference:%WPF%\PresentationCore.dll /reference:%WPF%\PresentationFramework.dll /reference:%WPF%\WindowsBase.dll /reference:%REF%\System.Windows.Forms.dll /reference:%REF%\System.Drawing.dll /reference:%REF%\System.Xaml.dll Program.cs ClockWindow.cs GifImage.cs TrayManager.cs Win32.cs Settings.cs WeComMonitor.cs
 
 if %errorlevel% == 0 (
     echo.

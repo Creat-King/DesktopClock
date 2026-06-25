@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)]()
 [![.NET](https://img.shields.io/badge/.NET%20Framework-4.8-purple.svg)]()
-[![Size](https://img.shields.io/badge/Size-24KB-green.svg)]()
+[![Size](https://img.shields.io/badge/Size-26KB-green.svg)]()
 
 **English** | [中文](#中文说明)
 
@@ -18,7 +18,7 @@ DesktopClock stays on top of all windows as a transparent time display. Mouse cl
 ### Why DesktopClock?
 
 - **Zero dependencies** — Runs on any Windows 10/11 machine with .NET Framework 4.8 (pre-installed). No SDK, no runtime download, no installer.
-- **24KB executable** — Smaller than most favicon files.
+- **26KB executable** — Smaller than most favicon files.
 - **Real click-through** — Not a semi-transparent overlay. Mouse events pass through via `WS_EX_TRANSPARENT`, letting you interact with windows below.
 - **Alt+Tab invisible** — Uses `WS_EX_TOOLWINDOW` to hide from the task switcher entirely.
 - **No IDE required** — Pure C# code, no XAML. Compiled with the built-in `csc.exe`. Just run `build.bat`.
@@ -27,13 +27,13 @@ DesktopClock stays on top of all windows as a transparent time display. Mouse cl
 - **Persistent settings** — Position and style are saved automatically.
 - **WeCom message monitor** — A green/red indicator dot on the clock edge turns red and pulses when WeCom (企业微信) receives new messages. Uses Windows Shell Hook (`HSHELL_FLASH`) for real-time, event-driven detection — no polling, no false positives from other apps.
 - **WeCom message monitor** — Green/red indicator dot on the clock edge. Flashes red when WeChat Work (企业微信) receives a new message, turns green when you open it. Powered by Shell Hook (`HSHELL_FLASH`), event-driven with zero polling overhead.
+- **Animated character** — A cute animated cartoon character (Crayon Shin-chan) displayed above the clock. Toggle show/hide from the tray menu.
 
 ---
 
 ## 中文说明
 
 一个真正「不挡手」的 Windows 桌面时钟。时间始终悬浮在所有窗口之上，但鼠标可以完全穿透它操作下方的界面。不出现在 Alt+Tab、不出现在任务栏、不干扰任何操作。支持企业微信新消息提醒监控。
-<img width="987" height="218" alt="image" src="https://github.com/user-attachments/assets/975c0cf2-acec-4029-a4de-48d0cd671493" />
 
 ### 核心特性
 
@@ -42,12 +42,13 @@ DesktopClock stays on top of all windows as a transparent time display. Mouse cl
 | 真正的点击穿透 | 通过 Win32 API `WS_EX_TRANSPARENT` 实现完全鼠标穿透，不是半透明遮罩 |
 | Alt+Tab 隐身 | 使用 `WS_EX_TOOLWINDOW` 样式，不出现在任务切换器中 |
 | 零依赖 | Windows 10/11 自带 .NET Framework 4.8，无需安装任何运行时或 SDK |
-| 极小体积 | 编译后仅 24KB |
+| 极小体积 | 编译后仅 26KB |
 | 无 XAML 纯代码 | 全部用 C# 构建 UI，系统自带 `csc.exe` 直接编译，不需要 Visual Studio |
 | 系统托盘 | 右键图标即可配置字体大小/颜色/透明度/开机自启 |
 | 全局热键 | `Ctrl+Alt+M` 切换移动模式，拖动到任意位置 |
 | 配置持久化 | 位置和样式自动保存，下次启动恢复 |
 | 企业微信消息监控 | 时钟边缘的指示灯：无消息绿色常亮，有新消息红色闪烁。通过 Shell Hook 实时检测任务栏闪烁，仅响应企业微信，不影响其他软件 |
+| 蜡笔小新动画 | 时钟上方显示可爱的蜡笔小新动画形象，可通过托盘菜单显示/隐藏 |
 
 ### 快速开始
 
@@ -75,7 +76,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe ^
   /reference:WindowsBase.dll ^
   /reference:System.Windows.Forms.dll ^
   /reference:System.Drawing.dll ^
-  Program.cs ClockWindow.cs TrayManager.cs Win32.cs Settings.cs WeComMonitor.cs
+  Program.cs ClockWindow.cs GifImage.cs TrayManager.cs Win32.cs Settings.cs WeComMonitor.cs
 ```
 
 ### 使用方法
@@ -89,6 +90,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe ^
 | 调整透明度 | 托盘菜单 → 透明度 → 50%/70%/85%/100% |
 | 开机自启 | 托盘菜单 → 开机自启 |
 | 开关企业微信监控 | 托盘菜单 → 监控企业微信 |
+| 显示/隐藏小新 | 托盘菜单 → 显示小新 |
 | 退出 | 托盘菜单 → 退出 |
 
 所有设置自动保存到 `%AppData%\DesktopClock\settings.txt`。
@@ -131,12 +133,14 @@ WS_EX_TOOLWINDOW   → 不出现在 Alt+Tab 和任务栏中
 DesktopClock/
 ├── Program.cs          # 程序入口，创建 WPF Application + 托盘管理
 ├── ClockWindow.cs      # 透明置顶窗口 + 时钟显示 + 指示灯 + 穿透/拖动逻辑
+├── GifImage.cs         # GIF 动画播放（BitmapDecoder 帧提取 + DispatcherTimer）
+├── character.gif       # 蜡笔小新动画 GIF
 ├── WeComMonitor.cs     # 企业微信消息监控（Shell Hook 事件 + 前台检测）
 ├── TrayManager.cs      # 系统托盘图标 + 右键菜单 + 热键
 ├── Win32.cs            # P/Invoke：窗口样式、热键、Shell Hook、窗口查找
 ├── Settings.cs         # 配置模型 + 加载/保存
 ├── build.bat           # 一键编译脚本
-├── DesktopClock.exe    # 编译好的可执行文件（24KB）
+├── DesktopClock.exe    # 编译好的可执行文件（26KB）
 └── README.md
 ```
 
